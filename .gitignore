@@ -1,0 +1,6 @@
+# Cache
+packer_cache
+packer-builder-arm
+
+# Image artifacts
+*.img

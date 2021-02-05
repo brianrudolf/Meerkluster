@@ -1,0 +1,92 @@
+{
+  "variables": {
+    "ssh_key_src": "/home/brian/.ssh/id_rsa_rpi.pub",
+    "image_home_dir": "/home/ubuntu"
+  },
+  "builders": [{
+    "type": "arm",
+    "file_urls" : ["http://cdimage.ubuntu.com/releases/20.04.1/release/ubuntu-20.04.2-preinstalled-server-arm64+raspi.img.xz"],
+    "file_checksum_url": "http://cdimage.ubuntu.com/releases/20.04.2/release/SHA256SUMS",
+    "file_checksum_type": "sha256",
+    "file_target_extension": "xz",
+    "file_unarchive_cmd": ["xz", "--decompress", "$ARCHIVE_PATH"],
+    "image_build_method": "reuse",
+    "image_path": "ubuntu-20.04.img",
+    "image_size": "3.1G",
+    "image_type": "dos",
+    "image_partitions": [
+      {
+        "name": "boot",
+        "type": "c",
+        "start_sector": "2048",
+        "filesystem": "fat",
+        "size": "256M",
+        "mountpoint": "/boot/firmware"
+      },
+      {
+        "name": "root",
+        "type": "83",
+        "start_sector": "526336",
+        "filesystem": "ext4",
+        "size": "2.8G",
+        "mountpoint": "/"
+      }
+
+    ],
+    "image_chroot_env": ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"],
+    "qemu_binary_source_path": "/usr/bin/qemu-aarch64-static",
+    "qemu_binary_destination_path": "/usr/bin/qemu-aarch64-static"
+  }],
+  "provisioners": [
+    { "type": "shell", 
+      "inline": [ 
+      "rm /etc/resolv.conf", 
+      "echo 'nameserver 1.1.1.1' > /etc/resolv.conf"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "nodes/config/network-config.yaml",
+      "destination": "/etc/netplan/50-cloud-init.yaml"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "mkdir -p {{user `image_home_dir`}}/.ssh"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `ssh_key_src`}}",
+      "destination": "{{user `image_home_dir`}}/.ssh/authorized_keys"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sed '/PasswordAuthentication/d' -i /etc/ssh/sshd_config",
+        "echo >> /etc/ssh/sshd_config",
+        "echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "echo 'LC_CTYPE=\"en_CA.UTF-8\"' >> /etc/default/locale",
+        "echo 'LC_ALL=\"en_CA.UTF-8\"' >> /etc/default/locale",
+        "echo 'LANG=\"en_CA.UTF-8\"' >> /etc/default/locale",
+        "echo \"deb http://packages.azlux.fr/debian/ buster main\" | tee /etc/apt/sources.list.d/azlux.list",
+        "wget -qO - https://azlux.fr/repo.gpg.key | sudo apt-key add -",
+        "sudo apt-get update -q",
+        "sudo apt-get install log2ram"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "apt-get update -q",
+        "apt-get upgrade -q -y "
+      ]
+    }
+  ],
+  "post-processors": []
+}
