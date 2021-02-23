@@ -1,13 +1,8 @@
 # Meerkluster
 
-This project is intended to encompass the steps taken to create a home lab Kubernetes cluster via [k3s](https://k3s.io/) on Raspberry PI(s). 
+A Kubernetes home server cluster via [k3s](https://k3s.io/) and Raspberry PI(s). 
 
-
-## Node OS and k3s Binary
-
-Using Packer the OS image can be built in an automated and idempotent fashion. This is preferred to referencing multiple blog posts and assembling a series of steps to follow on each node. This is also an exercise to work with Packer. The build process will be built in a way that this work can be readily used by others without security risks (SSH keys, wireless network credentials, etc.).
-
-The goals and progress of the work will be tracked in the [README](nodes/README.md) within the nodes/ directory.
+<img src="images/Meerkat_Loitering.png" width="400">
 
 ## Monitoring and Observability 
 

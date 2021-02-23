@@ -4,3 +4,6 @@ packer-builder-arm
 
 # Image artifacts
 *.img
+
+# Network config
+network-config.yaml
